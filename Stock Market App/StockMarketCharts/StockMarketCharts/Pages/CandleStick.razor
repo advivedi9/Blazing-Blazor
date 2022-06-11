@@ -1,0 +1,62 @@
+﻿@page "/"
+@using Newtonsoft.Json
+@using System.Reflection
+@inherits LayoutComponentBase
+
+<TelerikSwitch  @bind-Value="@IsCandlestickSelected" 
+                           Width="120px"
+                           OnLabel="Candle Stick"
+                           OffLabel="OHLC Chart"> 
+</TelerikSwitch>
+<button Class="m-2 btn btn-primary">Apple CMP:137.13</button>
+<button Class="m-2 btn btn-danger">-5.51 (-3.86%)</button>
+<TelerikRootComponent>
+    @if (ApplePrice != null)
+    {
+        <TelerikChart Width="100%"
+                      Height="400px"
+        Class="mt-3 border border-primary rounded">
+            <ChartTitle  Text="NASDAQ: 10 July 2022"></ChartTitle>
+            <ChartTooltip Visible="true"></ChartTooltip>
+
+            <ChartSeriesItems>
+                <ChartSeries Type="@( IsCandlestickSelected ? Telerik.Blazor.ChartSeriesType.Candlestick : Telerik.Blazor.ChartSeriesType.OHLC )"
+                         Data="@ApplePrice"
+                         CategoryField="@nameof(Stock.Date)"
+                         OpenField="@nameof(Stock.Open)"
+                         CloseField="@nameof(Stock.Close)"
+                         HighField="@nameof(Stock.High)"
+                         LowField="@nameof(Stock.Low)" DownColor="salmon" Color="yellowgreen">
+                </ChartSeries>
+            </ChartSeriesItems>
+
+            <ChartCategoryAxes>
+                <ChartCategoryAxis Type="Telerik.Blazor.ChartCategoryAxisType.Date">
+                </ChartCategoryAxis>
+            </ChartCategoryAxes>
+            <ChartValueAxes>
+                <ChartValueAxis Min="136" Max="170">
+                </ChartValueAxis>
+            </ChartValueAxes>
+        </TelerikChart>
+    }
+</TelerikRootComponent>
+<footer class="mt-3 border border-primary rounded w-25">
+	<p class="m-2">Copyright © 2022, Rikam Palkar.</p>
+    <p class="m-2">This app contains material by Telerik © 2022</p>
+</footer>
+@code {
+    List<Stock> ApplePrice { get; set; }
+
+    private bool IsCandlestickSelected { get; set; } = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        string jsonPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"Data\AppleStockPrices.json");
+        using (StreamReader stream = new StreamReader(jsonPath))
+        {
+            ApplePrice = JsonConvert.DeserializeObject<List<Stock>>(stream.ReadToEnd());
+        }
+    }
+
+}
